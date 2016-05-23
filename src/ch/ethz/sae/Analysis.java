@@ -338,15 +338,45 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 					operator = Texpr1BinNode.OP_MUL;
 				} else if(right instanceof JDivExpr) {
 					operator = Texpr1BinNode.OP_DIV;
+				} else {
+					System.out.println("operator: unexpected:" + Texpr1BinNode.class);
+					return;
 				}
 				// What Subexpressions do we have to handle here?
-				Texpr1Node kwesokunxeleAr = new Texpr1Node(kwesokunxele);
-				Texpr1Node kwesokudlaAr = new Texpr1Node(kwesokudla);
+				    // Only constant nodes and var nodes,
+				    // because Jimple is three address code
+				Texpr1Node kwesokunxeleAr;
+				if (kwesokunxele instanceof IntConstant) {
+					IntConstant c = ((IntConstant) kwesokunxele);
+					kwesokunxeleAr = new Texpr1CstNode(new MpqScalar(c.value));
+				} else if (kwesokunxele instanceof JimpleLocal) {
+					JimpleLocal x = ((JimpleLocal) kwesokunxele);
+					kwesokunxeleAr = new Texpr1VarNode(x.getName());
+				} else {
+					System.out.println("kwesokunxele: unexpected:" + kwesokunxele.getClass()
+							+ " name:" + ((JimpleLocal) kwesokunxele).getName());
+					return;
+				}
+				
+				Texpr1Node kwesokudlaAr;
+				if (kwesokudla instanceof IntConstant) {
+					IntConstant c = ((IntConstant) kwesokudla);
+					kwesokudlaAr = new Texpr1CstNode(new MpqScalar(c.value));
+				} else if (kwesokudla instanceof JimpleLocal) {
+					JimpleLocal x = ((JimpleLocal) kwesokudla);
+					kwesokudlaAr = new Texpr1VarNode(x.getName());
+				} else {
+					System.out.println("kwesokudla: unexpected:" + kwesokudla.getClass()
+							+ " name:" + ((JimpleLocal) kwesokudla).getName());
+					return;
+				}
+				
 				rAr = new Texpr1BinNode(operator, kwesokunxeleAr, kwesokudlaAr);
 				xp = new Texpr1Intern(env, rAr);
 				o.assign(man, varName, xp, null);
 			}
-			// TODO: Handle other kinds of assignments (e.g. x = y * z)		
+			// TODO: Handle other kinds of assignments (e.g. x = y * z)
+			// done
 			else {
 				if (o.getEnvironment().hasVar(varName)) {
 					o.forget(man, varName, false);
