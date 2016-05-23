@@ -1,5 +1,6 @@
 package ch.ethz.sae;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -319,10 +320,24 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 				o.assign(man, varName, xp, null);
 			}
 			else if (right instanceof JimpleLocal ){
-				JimpleLocal x = ((JimpleLocal) right);
-				rAr = new Texpr1VarNode(x.getName());
-				xp = new Texpr1Intern(env, rAr);
-				o.assign(man, varName, xp, null);
+				if (right.getType().toString().equals("PrinterArray")) {
+					// Nothing to do in APRON for the PinterArray
+					// TODO: Soot Pointer Analysis
+					return;
+				}
+				else {
+					String otherVarName = ((JimpleLocal) right).getName();
+					if (env.hasVar(otherVarName)) {
+						rAr = new Texpr1VarNode(otherVarName);
+						xp = new Texpr1Intern(env, rAr);
+						o.assign(man, varName, xp, null);
+					}
+					else {
+						System.out.println("variable on the right hand with name <" + otherVarName + 
+								">  and type <" + right.getType().toString() + "> unknown to current enviroment. Analysis.env: \nInts:" + Arrays.toString(env.getIntVars())
+								+ "\nReals:" + Arrays.toString(env.getRealVars()));
+					}
+				}
 			}
 			else if (right instanceof AbstractBinopExpr) {
 				AbstractBinopExpr binExpr = ((AbstractBinopExpr) right);
@@ -379,6 +394,9 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 			// done
 			else {
 				if (o.getEnvironment().hasVar(varName)) {
+					System.out.println("Right hand side of assignemnt: \nclass:" + right.getClass()
+						+ "\nString representation: " + right.toString());
+					System.out.println("forget variable: " + varName);
 					o.forget(man, varName, false);
 				}
 			}
