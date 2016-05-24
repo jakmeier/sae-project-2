@@ -12,6 +12,7 @@ import apron.Interval;
 import apron.Manager;
 import apron.MpqScalar;
 import apron.Polka;
+import apron.Tcons1;
 import apron.Texpr1BinNode;
 import apron.Texpr1CstNode;
 import apron.Texpr1Intern;
@@ -160,7 +161,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 	
 	private void handleIf(AbstractBinopExpr eqExpr, Abstract1 in, AWrapper ow,
 			AWrapper ow_branchout) throws ApronException {
-
 		Value left = eqExpr.getOp1();
 		Value right = eqExpr.getOp2();
 
@@ -203,9 +203,13 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 		// TODO: Handle required conditional expressions
 		
 		if (eqExpr instanceof JNeExpr) {
-			// not showing anything
-			System.out.println("Found a != conditional branch");
+			Texpr1BinNode differenceTree = new Texpr1BinNode(Texpr1BinNode.OP_SUB, lAr, rAr);
 			
+			Tcons1 disequalityConstraint = new Tcons1 (env, Tcons1.DISEQ, (Texpr1Node) differenceTree);
+			ow.set(in.meetCopy(man, disequalityConstraint));
+			
+			Tcons1 equalityConstraint = new Tcons1 (env, Tcons1.EQ, (Texpr1Node) differenceTree);
+			ow_branchout.set(in.meetCopy(man, equalityConstraint));
 		}
 	}
 	
@@ -306,7 +310,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 			throws ApronException {
 		
 		
-		Texpr1Node lAr = null;
+		//Texpr1Node lAr = null;
 		Texpr1Node rAr = null;
 		Texpr1Intern xp = null;
 		
@@ -322,7 +326,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 			else if (right instanceof JimpleLocal ){
 				if (right.getType().toString().equals("PrinterArray")) {
 					// Nothing to do in APRON for the PinterArray
-					// TODO: Soot Pointer Analysis
 					return;
 				}
 				else {
