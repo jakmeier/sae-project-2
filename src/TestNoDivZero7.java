@@ -4,6 +4,6 @@ public class TestNoDivZero5 {
         	int a = 1;
 		int b;
 		b = 1;
-		int c = a/b;
+		int c = a/(a+b);
     }
 }
