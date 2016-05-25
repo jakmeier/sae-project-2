@@ -7,7 +7,7 @@ import apron.Tcons1;
 import apron.Texpr1Node;
 import apron.Texpr1VarNode;
 import soot.Unit;
-import soot.jimple.AssignStmt;
+import soot.jimple.DefinitionStmt;
 import soot.jimple.IntConstant;
 import soot.jimple.internal.JDivExpr;
 import soot.jimple.internal.JInvokeStmt;
@@ -79,8 +79,8 @@ public class Verifier {
 			} 
 			
 			//TODO: Check that all divisors are not zero
-			if (u instanceof AssignStmt) {
-				Value rhs = ((AssignStmt) u).getRightOp();
+			if (u instanceof DefinitionStmt) {
+				Value rhs = ((DefinitionStmt) u).getRightOp();
 				if (rhs instanceof JDivExpr) {
 					Value divisor = ((JDivExpr) rhs).getOp2();
 					if ( divisor instanceof JimpleLocal ) {
