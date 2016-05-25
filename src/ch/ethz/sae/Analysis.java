@@ -201,15 +201,61 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 		// Here we also have rAr containing the expression tree of rAr
 		
 		// TODO: Handle required conditional expressions
+		// Done
+		
+		Texpr1BinNode differenceTreeLR = new Texpr1BinNode(Texpr1BinNode.OP_SUB, lAr, rAr);
+		Texpr1BinNode differenceTreeRL = new Texpr1BinNode(Texpr1BinNode.OP_SUB, rAr, lAr);
 		
 		if (eqExpr instanceof JNeExpr) {
-			Texpr1BinNode differenceTree = new Texpr1BinNode(Texpr1BinNode.OP_SUB, lAr, rAr);
-			
-			Tcons1 disequalityConstraint = new Tcons1 (env, Tcons1.DISEQ, (Texpr1Node) differenceTree);
+			// !=
+			Tcons1 disequalityConstraint = new Tcons1 (env, Tcons1.DISEQ, (Texpr1Node) differenceTreeLR);
 			ow.set(in.meetCopy(man, disequalityConstraint));
 			
-			Tcons1 equalityConstraint = new Tcons1 (env, Tcons1.EQ, (Texpr1Node) differenceTree);
+			Tcons1 equalityConstraint = new Tcons1 (env, Tcons1.EQ, (Texpr1Node) differenceTreeLR);
 			ow_branchout.set(in.meetCopy(man, equalityConstraint));
+		} 
+		else if (eqExpr instanceof JEqExpr) {
+			// ==
+			Tcons1 equalityConstraint = new Tcons1 (env, Tcons1.EQ, (Texpr1Node) differenceTreeLR);
+			ow.set(in.meetCopy(man, equalityConstraint));
+			
+			Tcons1 disequalityConstraint = new Tcons1 (env, Tcons1.DISEQ, (Texpr1Node) differenceTreeLR);
+			ow_branchout.set(in.meetCopy(man, disequalityConstraint));
+		}
+		else if (eqExpr instanceof JGeExpr) {
+			// >=
+			Tcons1 geConstraint = new Tcons1 (env, Tcons1.SUPEQ, (Texpr1Node) differenceTreeLR );
+			ow.set(in.meetCopy(man, geConstraint));
+			
+			Tcons1 ltConstraint = new Tcons1 (env, Tcons1.SUP, (Texpr1Node) differenceTreeRL );
+			ow_branchout.set(in.meetCopy(man, ltConstraint));
+		}
+		else if (eqExpr instanceof JLeExpr) {
+			// <=
+			Tcons1 leConstraint = new Tcons1 (env, Tcons1.SUPEQ, (Texpr1Node) differenceTreeRL );
+			ow.set(in.meetCopy(man, leConstraint));
+			
+			Tcons1 gtConstraint = new Tcons1 (env, Tcons1.SUP, (Texpr1Node) differenceTreeLR );
+			ow_branchout.set(in.meetCopy(man, gtConstraint));
+		}
+		else if (eqExpr instanceof JGtExpr) {
+			// >
+			Tcons1 gtConstraint = new Tcons1 (env, Tcons1.SUP, (Texpr1Node) differenceTreeLR );
+			ow.set(in.meetCopy(man, gtConstraint));
+			
+			Tcons1 leConstraint = new Tcons1 (env, Tcons1.SUPEQ, (Texpr1Node) differenceTreeRL );
+			ow_branchout.set(in.meetCopy(man, leConstraint));
+		}
+		else if (eqExpr instanceof JLtExpr) {
+			// <
+			Tcons1 ltConstraint = new Tcons1 (env, Tcons1.SUP, (Texpr1Node) differenceTreeRL );
+			ow.set(in.meetCopy(man, ltConstraint));
+			
+			Tcons1 geConstraint = new Tcons1 (env, Tcons1.SUPEQ, (Texpr1Node) differenceTreeLR );
+			ow_branchout.set(in.meetCopy(man, geConstraint));
+		}
+		else {
+			System.out.println("Unexpexted condition: " + eqExpr.toString() + " class:" + eqExpr.getClass().toString() );
 		}
 	}
 	
