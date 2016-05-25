@@ -3,11 +3,17 @@ package ch.ethz.sae;
 import java.util.HashMap;
 
 import apron.ApronException;
+import apron.Tcons1;
+import apron.Texpr1Node;
+import apron.Texpr1VarNode;
 import soot.Unit;
-
+import soot.jimple.AssignStmt;
+import soot.jimple.IntConstant;
+import soot.jimple.internal.JDivExpr;
 import soot.jimple.internal.JInvokeStmt;
 import soot.jimple.internal.JSpecialInvokeExpr;
 import soot.jimple.internal.JVirtualInvokeExpr;
+import soot.jimple.internal.JimpleLocal;
 import soot.jimple.spark.sets.DoublePointsToSet;
 import soot.jimple.spark.sets.P2SetVisitor;
 import soot.jimple.spark.SparkTransformer;
@@ -17,6 +23,7 @@ import soot.Local;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.Value;
 import soot.toolkits.graph.BriefUnitGraph;
 
 public class Verifier {
@@ -72,10 +79,31 @@ public class Verifier {
 			} 
 			
 			//TODO: Check that all divisors are not zero
+			if (u instanceof AssignStmt) {
+				Value rhs = ((AssignStmt) u).getRightOp();
+				if (rhs instanceof JDivExpr) {
+					Value divisor = ((JDivExpr) rhs).getOp2();
+					if ( divisor instanceof JimpleLocal ) {
+						Texpr1Node isihlukanisi = new Texpr1VarNode(((JimpleLocal) divisor).getName());
+						Tcons1 isNotZeroConstraint = new Tcons1(state.get().getEnvironment(), Tcons1.DISEQ, isihlukanisi);
+						try {
+							if (! state.get().satisfy(Analysis.man, isNotZeroConstraint)) return false;
+						}
+						catch (ApronException e) {
+							e.printStackTrace();
+						} 
+					} else if (divisor instanceof IntConstant) {
+						if ( ((IntConstant) divisor).value == 0 ) return false;
+					}
+					else {
+						System.out.println("Unexpected divisor: " + divisor.toString() + " of type " + divisor.getType().toString());
+					}
+				}
+			}
 	    }
 		
-		//Return false if the method may have division by zero errors
-	    return false;
+		//Return true if the method has no division by zero errors
+	    return true;
 	}
 
 	private static boolean verifyBounds(SootMethod method, Analysis fixPoint,
