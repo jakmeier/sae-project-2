@@ -1,9 +1,11 @@
 // result NO_DIV_ZERO
 public class TND_No3 {
-	public static void foo() {
-        	int a = 1;
+	public static void foo(int n) {
+        	int a = 3;
 		int b;
-		b = 1;
+                if (n >= 0) b = 1;
+                else b = -1;
 		int c = a/b;
     }
 }
+(
