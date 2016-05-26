@@ -24,6 +24,7 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Value;
+import soot.ValueBox;
 import soot.toolkits.graph.BriefUnitGraph;
 
 public class Verifier {
@@ -79,10 +80,9 @@ public class Verifier {
 			} 
 			
 			//TODO: Check that all divisors are not zero
-			if (u instanceof DefinitionStmt) {
-				Value rhs = ((DefinitionStmt) u).getRightOp();
-				if (rhs instanceof JDivExpr) {
-					Value divisor = ((JDivExpr) rhs).getOp2();
+			for (ValueBox inani: u.getUseBoxes()) {
+				if ( inani.getValue() instanceof JDivExpr ) {
+					Value divisor = ((JDivExpr) inani.getValue()).getOp2();
 					if ( divisor instanceof JimpleLocal ) {
 						Texpr1Node isihlukanisi = new Texpr1VarNode(((JimpleLocal) divisor).getName());
 						Tcons1 isNotZeroConstraint = new Tcons1(state.get().getEnvironment(), Tcons1.DISEQ, isihlukanisi);
