@@ -1,5 +1,5 @@
 // result NO_DIV_ZERO
-public class TestNoDivZero6 {
+public class TND_No3 {
 	public static void foo() {
         	int a = 1;
 		int b;
