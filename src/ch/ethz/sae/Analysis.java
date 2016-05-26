@@ -207,6 +207,12 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 		Texpr1BinNode differenceTreeLR = new Texpr1BinNode(Texpr1BinNode.OP_SUB, lAr, rAr);
 		Texpr1BinNode differenceTreeRL = new Texpr1BinNode(Texpr1BinNode.OP_SUB, rAr, lAr);
 		
+		System.out.println("Difference Tree L - R:");
+		Verifier.printTconsMatrix(in, differenceTreeLR);
+		System.out.println("Difference Tree R - L:");
+		Verifier.printTconsMatrix(in, differenceTreeRL);
+		
+		
 		if (eqExpr instanceof JNeExpr) {
 			// !=
 			Tcons1 disequalityConstraint = new Tcons1 (env, Tcons1.DISEQ, (Texpr1Node) differenceTreeLR);
@@ -426,7 +432,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 				Texpr1Node kwesokudlaAr;
 				if (kwesokudla instanceof IntConstant) {
 					IntConstant c = ((IntConstant) kwesokudla);
-					if (c.value != 0) {
+					if (c.value != 0 || operator != Texpr1BinNode.OP_DIV) {
 						kwesokudlaAr = new Texpr1CstNode(new MpqScalar(c.value));
 					}
 					else {

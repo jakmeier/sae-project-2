@@ -1,10 +1,15 @@
 package ch.ethz.sae;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 
 import apron.Abstract1;
 import apron.ApronException;
+import apron.Environment;
+import apron.MpqScalar;
 import apron.Tcons1;
+import apron.Texpr1CstNode;
+import apron.Texpr1Intern;
 import apron.Texpr1Node;
 import apron.Texpr1VarNode;
 import soot.Unit;
@@ -80,6 +85,27 @@ public class Verifier {
 				e.printStackTrace();
 			} 
 			
+			
+			try {
+				int i = 0;
+				Environment env = state.get().getEnvironment().add(new String[] {"sae_sucks"}, null);
+				Abstract1 abs = state.get().changeEnvironmentCopy(Analysis.man, env, true);;
+				
+				Texpr1Node constant = new Texpr1CstNode(new MpqScalar(i));
+				
+				Texpr1Intern intern = new Texpr1Intern(env, constant);
+				abs.assign(Analysis.man, "sae_sucks", intern, null);
+			
+				// DISEQ always returns false
+				printTconsMatrix(abs, constant);
+				printTconsMatrix(abs, new Texpr1VarNode("sae_sucks"));
+				
+				
+			} catch (ApronException e1) {
+				e1.printStackTrace();
+			}
+			
+			
 			//TODO: Check that all divisors are not zero
 			for (ValueBox inani: u.getUseBoxes()) {
 				if ( inani.getValue() instanceof JDivExpr ) {
@@ -119,7 +145,7 @@ public class Verifier {
 	    return true;
 	}
 
-	private static void printTconsMatrix(Abstract1 a, Texpr1Node expr) {
+	static void printTconsMatrix(Abstract1 a, Texpr1Node expr) {
 		try {
 			boolean eq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.EQ, expr));
 			boolean diseq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.DISEQ, expr));
