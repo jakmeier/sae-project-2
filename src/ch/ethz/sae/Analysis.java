@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import apron.Abstract0;
 import apron.Abstract1;
 import apron.ApronException;
 import apron.Environment;
@@ -425,7 +426,14 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 				Texpr1Node kwesokudlaAr;
 				if (kwesokudla instanceof IntConstant) {
 					IntConstant c = ((IntConstant) kwesokudla);
-					kwesokudlaAr = new Texpr1CstNode(new MpqScalar(c.value));
+					if (c.value != 0) {
+						kwesokudlaAr = new Texpr1CstNode(new MpqScalar(c.value));
+					}
+					else {
+						// Exception
+						o = new Abstract1(man, env, true);
+						return;
+					}
 				} else if (kwesokudla instanceof JimpleLocal) {
 					JimpleLocal x = ((JimpleLocal) kwesokudla);
 					kwesokudlaAr = new Texpr1VarNode(x.getName());

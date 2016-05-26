@@ -2,6 +2,7 @@ package ch.ethz.sae;
 
 import java.util.HashMap;
 
+import apron.Abstract1;
 import apron.ApronException;
 import apron.Tcons1;
 import apron.Texpr1Node;
@@ -82,18 +83,30 @@ public class Verifier {
 			//TODO: Check that all divisors are not zero
 			for (ValueBox inani: u.getUseBoxes()) {
 				if ( inani.getValue() instanceof JDivExpr ) {
+					System.out.println("Guess what I found: " + inani.toString() + " of class: " + inani.getClass() + " (a JDivExpr)");
+					//System.out.println("By the way, 2 / 0 = " + ((Integer)(2/0)).toString());
 					Value divisor = ((JDivExpr) inani.getValue()).getOp2();
 					if ( divisor instanceof JimpleLocal ) {
 						Texpr1Node isihlukanisi = new Texpr1VarNode(((JimpleLocal) divisor).getName());
+						printTconsMatrix(state.get(), isihlukanisi);
 						Tcons1 isNotZeroConstraint = new Tcons1(state.get().getEnvironment(), Tcons1.DISEQ, isihlukanisi);
 						try {
-							if (! state.get().satisfy(Analysis.man, isNotZeroConstraint)) return false;
+							if (! state.get().satisfy(Analysis.man, isNotZeroConstraint)) {
+								System.out.println("Variable used as divisor may be zero. | " + divisor.toString());
+								return false;
+							}
+							else {
+								System.out.println("Variable used as divisor is  guaranteed not zero. | " + divisor.toString());
+							}
 						}
 						catch (ApronException e) {
 							e.printStackTrace();
 						} 
 					} else if (divisor instanceof IntConstant) {
-						if ( ((IntConstant) divisor).value == 0 ) return false;
+						if ( ((IntConstant) divisor).value == 0 ) {
+							//System.out.println("Constant used as divisor may be zero. | " + divisor.toString());
+							return false;
+						}
 					}
 					else {
 						System.out.println("Unexpected divisor: " + divisor.toString() + " of type " + divisor.getType().toString());
@@ -106,6 +119,24 @@ public class Verifier {
 	    return true;
 	}
 
+	private static void printTconsMatrix(Abstract1 a, Texpr1Node expr) {
+		try {
+			boolean eq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.EQ, expr));
+			boolean diseq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.DISEQ, expr));
+			boolean sup = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUP, expr));
+			boolean supeq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUPEQ, expr));
+			System.out.println("Expression: " + expr.toString() 
+					+ "\n EQ: " + ((Boolean)eq).toString()
+					+ "\n DISEQ: " + ((Boolean)diseq).toString()
+					+ "\n SUP: " + ((Boolean)sup).toString()
+					+ "\n SUPEQ: " + ((Boolean)supeq).toString()
+					);
+			
+		} catch(ApronException e) {
+			e.printStackTrace();
+		} 
+	}
+	
 	private static boolean verifyBounds(SootMethod method, Analysis fixPoint,
 			PAG pointsTo) {
 				
