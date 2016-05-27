@@ -153,10 +153,12 @@ public class Verifier {
 			boolean sup = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUP, expr));
 			boolean supeq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUPEQ, expr));
 			System.out.println("Expression: " + expr.toString() 
+					+ "\nBound: " + a.getBound(a.getCreationManager(), new Texpr1Intern(a.getEnvironment(), expr))
 					+ "\n EQ: " + ((Boolean)eq).toString()
 					+ "\n DISEQ: " + ((Boolean)diseq).toString()
 					+ "\n SUP: " + ((Boolean)sup).toString()
 					+ "\n SUPEQ: " + ((Boolean)supeq).toString()
+					+ "\n"
 					);
 			
 		} catch(ApronException e) {
