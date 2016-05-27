@@ -117,6 +117,7 @@ public class Verifier {
 						printTconsMatrix(state.get(), isihlukanisi);
 						Tcons1 isNotZeroConstraint = new Tcons1(state.get().getEnvironment(), Tcons1.DISEQ, isihlukanisi);
 						try {
+							System.out.println("Variable used as divisor has bound: " + state.get().getBound(Analysis.man, ((JimpleLocal) divisor).getName()));
 							if (! state.get().satisfy(Analysis.man, isNotZeroConstraint)) {
 								System.out.println("Variable used as divisor may be zero. | " + divisor.toString());
 								return false;
