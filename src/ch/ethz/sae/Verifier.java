@@ -1,11 +1,13 @@
 package ch.ethz.sae;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import apron.Abstract1;
 import apron.ApronException;
 import apron.Environment;
+import apron.Manager;
 import apron.MpqScalar;
 import apron.Tcons1;
 import apron.Texpr1CstNode;
@@ -87,7 +89,7 @@ public class Verifier {
 			
 			
 			try {
-				int i = 0;
+				int i = 1;
 				Environment env = state.get().getEnvironment().add(new String[] {"sae_sucks"}, null);
 				Abstract1 abs = state.get().changeEnvironmentCopy(Analysis.man, env, true);;
 				
@@ -95,7 +97,8 @@ public class Verifier {
 				
 				Texpr1Intern intern = new Texpr1Intern(env, constant);
 				abs.assign(Analysis.man, "sae_sucks", intern, null);
-			
+				//abs.forget(Analysis.man, "sae_sucks", true);
+				
 				// DISEQ always returns false
 				printTconsMatrix(abs, constant);
 				printTconsMatrix(abs, new Texpr1VarNode("sae_sucks"));
@@ -148,13 +151,17 @@ public class Verifier {
 
 	static void printTconsMatrix(Abstract1 a, Texpr1Node expr) {
 		try {
+			Analysis.man.setFlagExactWanted(Manager.FUNID_IS_EQ, true);
 			boolean eq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.EQ, expr));
+			boolean eq_exact = Analysis.man.wasExact();
 			boolean diseq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.DISEQ, expr));
 			boolean sup = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUP, expr));
 			boolean supeq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUPEQ, expr));
+			Tcons1[] constraints = a.toTcons(Analysis.man);
 			System.out.println("Expression: " + expr.toString() 
 					+ "\nBound: " + a.getBound(a.getCreationManager(), new Texpr1Intern(a.getEnvironment(), expr))
-					+ "\n EQ: " + ((Boolean)eq).toString()
+					+ "\nDomain constraints: " + Arrays.toString(constraints)
+					+ "\n EQ: " + ((Boolean)eq).toString() + " (exact: " + ((Boolean)eq_exact).toString() + ")"
 					+ "\n DISEQ: " + ((Boolean)diseq).toString()
 					+ "\n SUP: " + ((Boolean)sup).toString()
 					+ "\n SUPEQ: " + ((Boolean)supeq).toString()
