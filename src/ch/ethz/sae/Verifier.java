@@ -89,7 +89,7 @@ public class Verifier {
 			
 			
 			try {
-				int i = 1;
+				int i = 0;
 				Environment env = state.get().getEnvironment().add(new String[] {"sae_sucks"}, null);
 				Abstract1 abs = state.get().changeEnvironmentCopy(Analysis.man, env, true);;
 				
@@ -151,10 +151,13 @@ public class Verifier {
 
 	static void printTconsMatrix(Abstract1 a, Texpr1Node expr) {
 		try {
-			Analysis.man.setFlagExactWanted(Manager.FUNID_IS_EQ, true);
+			Analysis.man.setFlagExactWanted(Manager.FUNID_SAT_TCONS, true);
 			boolean eq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.EQ, expr));
 			boolean eq_exact = Analysis.man.wasExact();
+			Analysis.man.setFlagExactWanted(Manager.FUNID_SAT_TCONS, true); // Probably unnecessary
 			boolean diseq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.DISEQ, expr));
+			boolean diseq_exact = Analysis.man.wasExact();
+			Analysis.man.setFlagExactWanted(Manager.FUNID_SAT_TCONS, false);
 			boolean sup = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUP, expr));
 			boolean supeq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUPEQ, expr));
 			Tcons1[] constraints = a.toTcons(Analysis.man);
@@ -162,7 +165,7 @@ public class Verifier {
 					+ "\nBound: " + a.getBound(a.getCreationManager(), new Texpr1Intern(a.getEnvironment(), expr))
 					+ "\nDomain constraints: " + Arrays.toString(constraints)
 					+ "\n EQ: " + ((Boolean)eq).toString() + " (exact: " + ((Boolean)eq_exact).toString() + ")"
-					+ "\n DISEQ: " + ((Boolean)diseq).toString()
+					+ "\n DISEQ: " + ((Boolean)diseq).toString() + " (exact: " + ((Boolean)diseq_exact).toString() + ")"
 					+ "\n SUP: " + ((Boolean)sup).toString()
 					+ "\n SUPEQ: " + ((Boolean)supeq).toString()
 					+ "\n"
