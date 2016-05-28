@@ -89,7 +89,7 @@ public class Verifier {
 			
 			
 			try {
-				int i = 0;
+				int i = 1;
 				Environment env = state.get().getEnvironment().add(new String[] {"sae_sucks"}, null);
 				Abstract1 abs = state.get().changeEnvironmentCopy(Analysis.man, env, true);;
 				
@@ -151,6 +151,7 @@ public class Verifier {
 
 	static void printTconsMatrix(Abstract1 a, Texpr1Node expr) {
 		try {
+			Analysis.man.setAlgorithm(Manager.FUNID_SAT_TCONS, Integer.MAX_VALUE);
 			Analysis.man.setFlagExactWanted(Manager.FUNID_SAT_TCONS, true);
 			boolean eq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.EQ, expr));
 			boolean eq_exact = Analysis.man.wasExact();

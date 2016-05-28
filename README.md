@@ -1,6 +1,6 @@
 # sae-project-2
 
-
+APRON explained: http://apron.cri.ensmp.fr/library/expose_mine_CEA_2007.pdf
 
 Texpr1Node isihlukanisi = new Texpr1VarNode(((JimpleLocal) divisor).getName());
 //Tcons1 isNotZeroConstraint = new Tcons1(state.get().getEnvironment(), Tcons1.DISEQ, isihlukanisi);
