@@ -190,6 +190,11 @@ public class Verifier {
 			PAG pointsTo) {
 				
 		//TODO: Create a list of all allocation sites for PrinterArray
+		for (Local j: method.getActiveBody().getLocals()) {
+			if (j.getType().toString().equals("PrinterArray")) {
+				//found printerArray
+			}
+		}
 		
 		for (Unit u : method.retrieveActiveBody().getUnits()) {
 			AWrapper state = fixPoint.getFlowBefore(u);
