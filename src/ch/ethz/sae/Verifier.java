@@ -7,6 +7,7 @@ import java.util.HashMap;
 import apron.Abstract1;
 import apron.ApronException;
 import apron.Environment;
+import apron.Interval;
 import apron.Manager;
 import apron.MpqScalar;
 import apron.Tcons1;
@@ -88,7 +89,7 @@ public class Verifier {
 			} 
 			
 			
-			try {
+			/*try {
 				int i = 1;
 				Environment env = state.get().getEnvironment().add(new String[] {"sae_sucks"}, null);
 				Abstract1 abs = state.get().changeEnvironmentCopy(Analysis.man, env, true);;
@@ -106,7 +107,7 @@ public class Verifier {
 				
 			} catch (ApronException e1) {
 				e1.printStackTrace();
-			}
+			}*/
 			
 			
 			//TODO: Check that all divisors are not zero
@@ -118,7 +119,7 @@ public class Verifier {
 					if ( divisor instanceof JimpleLocal ) {
 						Texpr1Node isihlukanisi = new Texpr1VarNode(((JimpleLocal) divisor).getName());
 						printTconsMatrix(state.get(), isihlukanisi);
-						Tcons1 isNotZeroConstraint = new Tcons1(state.get().getEnvironment(), Tcons1.DISEQ, isihlukanisi);
+						/*Tcons1 isNotZeroConstraint = new Tcons1(state.get().getEnvironment(), Tcons1.DISEQ, isihlukanisi);
 						try {
 							System.out.println("Variable used as divisor has bound: " + state.get().getBound(Analysis.man, ((JimpleLocal) divisor).getName()));
 							if (! state.get().satisfy(Analysis.man, isNotZeroConstraint)) {
@@ -131,7 +132,15 @@ public class Verifier {
 						}
 						catch (ApronException e) {
 							e.printStackTrace();
-						} 
+						} */
+						try {
+							Interval boundary = state.get().getBound(state.get().getCreationManager(), new Texpr1Intern(state.get().getEnvironment(), isihlukanisi));
+							Interval zero = new Interval(0,0);
+							if ( boundary.cmp(zero) == 0 || boundary.cmp(zero) == 1 || boundary.cmp(zero) == -1 ) return false;
+						} catch (ApronException e) {
+							e.printStackTrace();
+						}
+								
 					} else if (divisor instanceof IntConstant) {
 						if ( ((IntConstant) divisor).value == 0 ) {
 							//System.out.println("Constant used as divisor may be zero. | " + divisor.toString());

@@ -212,6 +212,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 		System.out.println("Difference Tree R - L:");
 		Verifier.printTconsMatrix(in, differenceTreeRL);
 		
+		Analysis.man.setAlgorithm(Manager.FUNID_MEET, Integer.MAX_VALUE);
+		Analysis.man.setAlgorithm(Manager.FUNID_MEET_TCONS_ARRAY, Integer.MAX_VALUE);
 		
 		if (eqExpr instanceof JNeExpr) {
 			// !=
@@ -374,6 +376,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 				IntConstant c = ((IntConstant) right);
 				rAr = new Texpr1CstNode(new MpqScalar(c.value));
 				xp = new Texpr1Intern(env, rAr);
+				Analysis.man.setAlgorithm(Manager.FUNID_ASSIGN_TEXPR_ARRAY, Integer.MAX_VALUE);
 				o.assign(man, varName, xp, null);
 			}
 			else if (right instanceof JimpleLocal ){
@@ -386,6 +389,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 					if (env.hasVar(otherVarName)) {
 						rAr = new Texpr1VarNode(otherVarName);
 						xp = new Texpr1Intern(env, rAr);
+						Analysis.man.setAlgorithm(Manager.FUNID_ASSIGN_TEXPR_ARRAY, Integer.MAX_VALUE);
 						o.assign(man, varName, xp, null);
 					}
 					else {
@@ -451,6 +455,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 				
 				rAr = new Texpr1BinNode(operator, kwesokunxeleAr, kwesokudlaAr);
 				xp = new Texpr1Intern(env, rAr);
+				Analysis.man.setAlgorithm(Manager.FUNID_ASSIGN_TEXPR_ARRAY, Integer.MAX_VALUE);
 				o.assign(man, varName, xp, null);
 			}
 			// TODO: Handle other kinds of assignments (e.g. x = y * z)
