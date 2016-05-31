@@ -3,6 +3,8 @@ package ch.ethz.sae;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import apron.Abstract1;
 import apron.ApronException;
@@ -91,18 +93,18 @@ public class Verifier {
 			
 			/*try {
 				int i = 1;
-				Environment env = state.get().getEnvironment().add(new String[] {"sae_sucks"}, null);
+				Environment env = state.get().getEnvironment().add(new String[] {"some_variable"}, null);
 				Abstract1 abs = state.get().changeEnvironmentCopy(Analysis.man, env, true);;
 				
 				Texpr1Node constant = new Texpr1CstNode(new MpqScalar(i));
 				
 				Texpr1Intern intern = new Texpr1Intern(env, constant);
-				abs.assign(Analysis.man, "sae_sucks", intern, null);
-				//abs.forget(Analysis.man, "sae_sucks", true);
+				abs.assign(Analysis.man, "some_variable", intern, null);
+				//abs.forget(Analysis.man, "some_variable", true);
 				
 				// DISEQ always returns false
 				printTconsMatrix(abs, constant);
-				printTconsMatrix(abs, new Texpr1VarNode("sae_sucks"));
+				printTconsMatrix(abs, new Texpr1VarNode("some_variable"));
 				
 				
 			} catch (ApronException e1) {
@@ -186,15 +188,14 @@ public class Verifier {
 		} 
 	}
 	
+	static List<Integer> paSize;
+	
 	private static boolean verifyBounds(SootMethod method, Analysis fixPoint,
 			PAG pointsTo) {
 				
 		//TODO: Create a list of all allocation sites for PrinterArray
-		for (Local j: method.getActiveBody().getLocals()) {
-			if (j.getType().toString().equals("PrinterArray")) {
-				//found printerArray
-			}
-		}
+		
+		paSize = new LinkedList<Integer>();
 		
 		for (Unit u : method.retrieveActiveBody().getUnits()) {
 			AWrapper state = fixPoint.getFlowBefore(u);
@@ -211,7 +212,17 @@ public class Verifier {
 			
 			if (u instanceof JInvokeStmt && ((JInvokeStmt) u).getInvokeExpr() instanceof JSpecialInvokeExpr) {
 				// TODO: Get the size of the PrinterArray given as argument to the constructor
-				
+				JSpecialInvokeExpr inkulumo = (JSpecialInvokeExpr) ((JInvokeStmt) u).getInvokeExpr(); 
+				if (inkulumo.getMethod().getDeclaringClass().equals("PrinterArray")) {
+					Value size = inkulumo.getArg(0);
+					if ( size instanceof IntConstant ) {
+						paSize.add(((IntConstant) size).value );
+					}
+					else {
+						System.out.println("PrinterArray was constructed with an argument that is not a IntConstant: " + size);
+					}
+				}
+
 			}
 			
 			if (u instanceof JInvokeStmt && ((JInvokeStmt) u).getInvokeExpr() instanceof JVirtualInvokeExpr) {
@@ -227,6 +238,16 @@ public class Verifier {
 				if (invokeExpr.getMethod().getName().equals(Analysis.functionName)) {
 					
 					// TODO: Check whether the 'sendJob' method's argument is within bounds
+					Value v = invokeExpr.getArg(0);
+					if (v instanceof IntConstant) {
+						
+					}
+					else if (v instanceof JimpleLocal) {
+						
+					}
+					else {
+						System.out.println("Unexpected argument for sendJob: " + v);
+					}
 					
 					// Visit all allocation sites that the base pointer may reference
 					MyP2SetVisitor visitor = new MyP2SetVisitor();
@@ -235,7 +256,7 @@ public class Verifier {
 			}
 		}
 
-		return false;
+		return true;
 	}
 
 	private static SootClass loadClass(String name) {
@@ -269,5 +290,6 @@ class MyP2SetVisitor extends P2SetVisitor{
 	@Override
 	public void visit(Node arg0) {
 		//TODO: Check whether the argument given to sendJob is within bounds
+		System.out.println("Node number: " + arg0.getNumber() + " Node: " + arg0);
 	}
 }
