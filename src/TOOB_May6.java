@@ -5,7 +5,7 @@ public class TOOB_May6 {
 		int i = 15;
 		if (1 < 0) i = 5;
 		
-		pa.sendJob(5);
+		pa.sendJob(i);
 
 	}
 }
