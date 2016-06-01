@@ -85,8 +85,7 @@ public class Verifier {
 			//TODO: Check that all divisors are not zero
 			for (ValueBox inani: u.getUseBoxes()) {
 				if ( inani.getValue() instanceof JDivExpr ) {
-					System.out.println("Guess what I found: " + inani.toString() + " of class: " + inani.getClass() + " (a JDivExpr)");
-					//System.out.println("By the way, 2 / 0 = " + ((Integer)(2/0)).toString());
+		
 					Value divisor = ((JDivExpr) inani.getValue()).getOp2();
 					if ( divisor instanceof JimpleLocal ) {
 						Texpr1Node isihlukanisi = new Texpr1VarNode(((JimpleLocal) divisor).getName());

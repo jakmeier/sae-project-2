@@ -210,57 +210,69 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 		Analysis.man.setAlgorithm(Manager.FUNID_MEET, Integer.MAX_VALUE);
 		Analysis.man.setAlgorithm(Manager.FUNID_MEET_TCONS_ARRAY, Integer.MAX_VALUE);
 		
+		System.out.println("\n" + eqExpr);
+		System.out.println("Left: " + getInterval(new AWrapper(in), left));
+		System.out.println("Right: " + getInterval(new AWrapper(in), right));
+		System.out.println("In: " + Arrays.toString(in.toTcons(man)));
+		
 		if (eqExpr instanceof JNeExpr) {
-			// !=
+			// !=			
 			Tcons1 disequalityConstraint = new Tcons1 (env, Tcons1.DISEQ, (Texpr1Node) differenceTreeLR);
-			ow.set(in.meetCopy(man, disequalityConstraint));
+			ow_branchout.set(in.meetCopy(man, disequalityConstraint));
 			
 			Tcons1 equalityConstraint = new Tcons1 (env, Tcons1.EQ, (Texpr1Node) differenceTreeLR);
-			ow_branchout.set(in.meetCopy(man, equalityConstraint));
+			ow.set(in.meetCopy(man, equalityConstraint));
+			
 		} 
 		else if (eqExpr instanceof JEqExpr) {
 			// ==
 			Tcons1 equalityConstraint = new Tcons1 (env, Tcons1.EQ, (Texpr1Node) differenceTreeLR);
-			ow.set(in.meetCopy(man, equalityConstraint));
+			ow_branchout.set(in.meetCopy(man, equalityConstraint));
 			
 			Tcons1 disequalityConstraint = new Tcons1 (env, Tcons1.DISEQ, (Texpr1Node) differenceTreeLR);
-			ow_branchout.set(in.meetCopy(man, disequalityConstraint));
+			ow.set(in.meetCopy(man, disequalityConstraint));
 		}
 		else if (eqExpr instanceof JGeExpr) {
 			// >=
 			Tcons1 geConstraint = new Tcons1 (env, Tcons1.SUPEQ, (Texpr1Node) differenceTreeLR );
-			ow.set(in.meetCopy(man, geConstraint));
+			ow_branchout.set(in.meetCopy(man, geConstraint));
 			
 			Tcons1 ltConstraint = new Tcons1 (env, Tcons1.SUP, (Texpr1Node) differenceTreeRL );
-			ow_branchout.set(in.meetCopy(man, ltConstraint));
+			ow.set(in.meetCopy(man, ltConstraint));
 		}
 		else if (eqExpr instanceof JLeExpr) {
 			// <=
 			Tcons1 leConstraint = new Tcons1 (env, Tcons1.SUPEQ, (Texpr1Node) differenceTreeRL );
-			ow.set(in.meetCopy(man, leConstraint));
+			ow_branchout.set(in.meetCopy(man, leConstraint));
 			
 			Tcons1 gtConstraint = new Tcons1 (env, Tcons1.SUP, (Texpr1Node) differenceTreeLR );
-			ow_branchout.set(in.meetCopy(man, gtConstraint));
+			ow.set(in.meetCopy(man, gtConstraint));
 		}
 		else if (eqExpr instanceof JGtExpr) {
 			// >
 			Tcons1 gtConstraint = new Tcons1 (env, Tcons1.SUP, (Texpr1Node) differenceTreeLR );
-			ow.set(in.meetCopy(man, gtConstraint));
+			ow_branchout.set(in.meetCopy(man, gtConstraint));
 			
 			Tcons1 leConstraint = new Tcons1 (env, Tcons1.SUPEQ, (Texpr1Node) differenceTreeRL );
-			ow_branchout.set(in.meetCopy(man, leConstraint));
+			ow.set(in.meetCopy(man, leConstraint));
 		}
 		else if (eqExpr instanceof JLtExpr) {
 			// <
 			Tcons1 ltConstraint = new Tcons1 (env, Tcons1.SUP, (Texpr1Node) differenceTreeRL );
-			ow.set(in.meetCopy(man, ltConstraint));
+			ow_branchout.set(in.meetCopy(man, ltConstraint));
 			
 			Tcons1 geConstraint = new Tcons1 (env, Tcons1.SUPEQ, (Texpr1Node) differenceTreeLR );
-			ow_branchout.set(in.meetCopy(man, geConstraint));
+			ow.set(in.meetCopy(man, geConstraint));
 		}
 		else {
 			System.out.println("Unexpexted condition: " + eqExpr.toString() + " class:" + eqExpr.getClass().toString() );
 		}
+		System.out.println("If branch: " + Arrays.toString(ow_branchout.get().toTcons(man)));
+		System.out.println("Left: " + getInterval(ow_branchout, left));
+		System.out.println("Right: " + getInterval(ow_branchout, right));
+		System.out.println("Else branch: " + Arrays.toString(ow.get().toTcons(man)));
+		System.out.println("Left: " + getInterval(ow, left));
+		System.out.println("Right: " + getInterval(ow, right));
 	}
 	
 	
@@ -457,9 +469,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 			// done
 			else {
 				if (o.getEnvironment().hasVar(varName)) {
-					System.out.println("Right hand side of assignemnt: \nclass:" + right.getClass()
-						+ "\nString representation: " + right.toString());
-					System.out.println("forget variable: " + varName);
 					o.forget(man, varName, false);
 				}
 			}
