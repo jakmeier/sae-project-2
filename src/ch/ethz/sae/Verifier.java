@@ -1,25 +1,15 @@
 package ch.ethz.sae;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
-import apron.Abstract1;
 import apron.ApronException;
-import apron.Environment;
 import apron.Interval;
-import apron.Manager;
-import apron.MpqScalar;
-import apron.Tcons1;
-import apron.Texpr1CstNode;
 import apron.Texpr1Intern;
 import apron.Texpr1Node;
 import apron.Texpr1VarNode;
 import soot.Unit;
-import soot.jimple.DefinitionStmt;
 import soot.jimple.IntConstant;
 import soot.jimple.internal.JDivExpr;
 import soot.jimple.internal.JInvokeStmt;
@@ -148,15 +138,12 @@ public class Verifier {
 
 			
 			if (u instanceof JInvokeStmt && ((JInvokeStmt) u).getInvokeExpr() instanceof JSpecialInvokeExpr) {
-				System.out.println("Special invoke found");
 				// TODO: Get the size of the PrinterArray given as argument to the constructor
+				// Done
 				JSpecialInvokeExpr inkulumo = (JSpecialInvokeExpr) ((JInvokeStmt) u).getInvokeExpr(); 
-				System.out.println("Declaring class: " + inkulumo.getMethod().getDeclaringClass());
 				if (inkulumo.getMethod().getDeclaringClass().toString().equals("PrinterArray")) {
-					System.out.println("Declaring class printer invoke");
 					Value size = inkulumo.getArg(0);
 					if ( size instanceof IntConstant ) {
-						System.out.println("Add interval");
 						paInterval.add( new Interval (0, ((IntConstant) size).value -1 ));
 					}
 					else {
@@ -179,6 +166,7 @@ public class Verifier {
 				if (invokeExpr.getMethod().getName().equals(Analysis.functionName)) {
 					
 					// TODO: Check whether the 'sendJob' method's argument is within bounds
+					// Done
 					Value v = invokeExpr.getArg(0);
 					Interval arrayIndex = Analysis.getInterval(state, v);
 					
@@ -233,7 +221,7 @@ class MyP2SetVisitor extends P2SetVisitor{
 	@Override
 	public void visit(Node arg0) {
 		//TODO: Check whether the argument given to sendJob is within bounds
-		System.out.println("Node number: " + arg0.getNumber() + " Node: " + arg0);
+		// Done
 		Interval paInterval = Verifier.paInterval.get(arg0.getNumber()-1);
 		if (!( paInterval.cmp(this.arrayIndex) == 0 || paInterval.cmp(this.arrayIndex) == 1 )) {
 			this.returnValue = false;
