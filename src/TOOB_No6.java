@@ -3,7 +3,13 @@ public class TOOB_No6 {
 		PrinterArray pa = new PrinterArray(10);
 		
 		int i = 15;
-		if (1 > 0) i = 5;
+		int a = 0;
+		int b = 10;
+		
+		a = a * 5;
+		b = b / 2;
+		
+		if (b > a) i = 5;
 		
 		pa.sendJob(i);
 
