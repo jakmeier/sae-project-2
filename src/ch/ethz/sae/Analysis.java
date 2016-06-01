@@ -207,11 +207,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 		Texpr1BinNode differenceTreeLR = new Texpr1BinNode(Texpr1BinNode.OP_SUB, lAr, rAr);
 		Texpr1BinNode differenceTreeRL = new Texpr1BinNode(Texpr1BinNode.OP_SUB, rAr, lAr);
 		
-		System.out.println("Difference Tree L - R:");
-		Verifier.printTconsMatrix(in, differenceTreeLR);
-		System.out.println("Difference Tree R - L:");
-		Verifier.printTconsMatrix(in, differenceTreeRL);
-		
 		Analysis.man.setAlgorithm(Manager.FUNID_MEET, Integer.MAX_VALUE);
 		Analysis.man.setAlgorithm(Manager.FUNID_MEET_TCONS_ARRAY, Integer.MAX_VALUE);
 		

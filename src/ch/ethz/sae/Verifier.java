@@ -1,6 +1,7 @@
 package ch.ethz.sae;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -91,27 +92,6 @@ public class Verifier {
 			} 
 			
 			
-			/*try {
-				int i = 1;
-				Environment env = state.get().getEnvironment().add(new String[] {"some_variable"}, null);
-				Abstract1 abs = state.get().changeEnvironmentCopy(Analysis.man, env, true);;
-				
-				Texpr1Node constant = new Texpr1CstNode(new MpqScalar(i));
-				
-				Texpr1Intern intern = new Texpr1Intern(env, constant);
-				abs.assign(Analysis.man, "some_variable", intern, null);
-				//abs.forget(Analysis.man, "some_variable", true);
-				
-				// DISEQ always returns false
-				printTconsMatrix(abs, constant);
-				printTconsMatrix(abs, new Texpr1VarNode("some_variable"));
-				
-				
-			} catch (ApronException e1) {
-				e1.printStackTrace();
-			}*/
-			
-			
 			//TODO: Check that all divisors are not zero
 			for (ValueBox inani: u.getUseBoxes()) {
 				if ( inani.getValue() instanceof JDivExpr ) {
@@ -120,21 +100,6 @@ public class Verifier {
 					Value divisor = ((JDivExpr) inani.getValue()).getOp2();
 					if ( divisor instanceof JimpleLocal ) {
 						Texpr1Node isihlukanisi = new Texpr1VarNode(((JimpleLocal) divisor).getName());
-						printTconsMatrix(state.get(), isihlukanisi);
-						/*Tcons1 isNotZeroConstraint = new Tcons1(state.get().getEnvironment(), Tcons1.DISEQ, isihlukanisi);
-						try {
-							System.out.println("Variable used as divisor has bound: " + state.get().getBound(Analysis.man, ((JimpleLocal) divisor).getName()));
-							if (! state.get().satisfy(Analysis.man, isNotZeroConstraint)) {
-								System.out.println("Variable used as divisor may be zero. | " + divisor.toString());
-								return false;
-							}
-							else {
-								System.out.println("Variable used as divisor is  guaranteed not zero. | " + divisor.toString());
-							}
-						}
-						catch (ApronException e) {
-							e.printStackTrace();
-						} */
 						try {
 							Interval boundary = state.get().getBound(state.get().getCreationManager(), new Texpr1Intern(state.get().getEnvironment(), isihlukanisi));
 							Interval zero = new Interval(0,0);
@@ -159,43 +124,15 @@ public class Verifier {
 		//Return true if the method has no division by zero errors
 	    return true;
 	}
-
-	static void printTconsMatrix(Abstract1 a, Texpr1Node expr) {
-		try {
-			Analysis.man.setAlgorithm(Manager.FUNID_SAT_TCONS, Integer.MAX_VALUE);
-			Analysis.man.setFlagExactWanted(Manager.FUNID_SAT_TCONS, true);
-			boolean eq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.EQ, expr));
-			boolean eq_exact = Analysis.man.wasExact();
-			Analysis.man.setFlagExactWanted(Manager.FUNID_SAT_TCONS, true); // Probably unnecessary
-			boolean diseq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.DISEQ, expr));
-			boolean diseq_exact = Analysis.man.wasExact();
-			Analysis.man.setFlagExactWanted(Manager.FUNID_SAT_TCONS, false);
-			boolean sup = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUP, expr));
-			boolean supeq = a.satisfy(Analysis.man, new Tcons1(a.getEnvironment(), Tcons1.SUPEQ, expr));
-			Tcons1[] constraints = a.toTcons(Analysis.man);
-			System.out.println("Expression: " + expr.toString() 
-					+ "\nBound: " + a.getBound(a.getCreationManager(), new Texpr1Intern(a.getEnvironment(), expr))
-					+ "\nDomain constraints: " + Arrays.toString(constraints)
-					+ "\n EQ: " + ((Boolean)eq).toString() + " (exact: " + ((Boolean)eq_exact).toString() + ")"
-					+ "\n DISEQ: " + ((Boolean)diseq).toString() + " (exact: " + ((Boolean)diseq_exact).toString() + ")"
-					+ "\n SUP: " + ((Boolean)sup).toString()
-					+ "\n SUPEQ: " + ((Boolean)supeq).toString()
-					+ "\n"
-					);
-			
-		} catch(ApronException e) {
-			e.printStackTrace();
-		} 
-	}
 	
-	static List<Integer> paSize;
+	static List<Interval> paInterval;
 	
 	private static boolean verifyBounds(SootMethod method, Analysis fixPoint,
 			PAG pointsTo) {
 				
 		//TODO: Create a list of all allocation sites for PrinterArray
 		
-		paSize = new LinkedList<Integer>();
+		paInterval = new ArrayList<Interval>();
 		
 		for (Unit u : method.retrieveActiveBody().getUnits()) {
 			AWrapper state = fixPoint.getFlowBefore(u);
@@ -211,12 +148,16 @@ public class Verifier {
 
 			
 			if (u instanceof JInvokeStmt && ((JInvokeStmt) u).getInvokeExpr() instanceof JSpecialInvokeExpr) {
+				System.out.println("Special invoke found");
 				// TODO: Get the size of the PrinterArray given as argument to the constructor
 				JSpecialInvokeExpr inkulumo = (JSpecialInvokeExpr) ((JInvokeStmt) u).getInvokeExpr(); 
-				if (inkulumo.getMethod().getDeclaringClass().equals("PrinterArray")) {
+				System.out.println("Declaring class: " + inkulumo.getMethod().getDeclaringClass());
+				if (inkulumo.getMethod().getDeclaringClass().toString().equals("PrinterArray")) {
+					System.out.println("Declaring class printer invoke");
 					Value size = inkulumo.getArg(0);
 					if ( size instanceof IntConstant ) {
-						paSize.add(((IntConstant) size).value );
+						System.out.println("Add interval");
+						paInterval.add( new Interval (0, ((IntConstant) size).value -1 ));
 					}
 					else {
 						System.out.println("PrinterArray was constructed with an argument that is not a IntConstant: " + size);
@@ -239,19 +180,14 @@ public class Verifier {
 					
 					// TODO: Check whether the 'sendJob' method's argument is within bounds
 					Value v = invokeExpr.getArg(0);
-					if (v instanceof IntConstant) {
-						
-					}
-					else if (v instanceof JimpleLocal) {
-						
-					}
-					else {
-						System.out.println("Unexpected argument for sendJob: " + v);
-					}
+					Interval arrayIndex = Analysis.getInterval(state, v);
+					
 					
 					// Visit all allocation sites that the base pointer may reference
-					MyP2SetVisitor visitor = new MyP2SetVisitor();
-					pts.forall(visitor);
+					MyP2SetVisitor visitor = new MyP2SetVisitor(arrayIndex);
+					if (! pts.forall(visitor)){
+						return false;
+					}
 				}
 			}
 		}
@@ -287,9 +223,20 @@ public class Verifier {
 
 class MyP2SetVisitor extends P2SetVisitor{
 	
+	public MyP2SetVisitor (Interval i) {
+		this.arrayIndex = i;
+		this.returnValue = true;
+	}
+	
+	private Interval arrayIndex; 
+	
 	@Override
 	public void visit(Node arg0) {
 		//TODO: Check whether the argument given to sendJob is within bounds
 		System.out.println("Node number: " + arg0.getNumber() + " Node: " + arg0);
+		Interval paInterval = Verifier.paInterval.get(arg0.getNumber()-1);
+		if (!( paInterval.cmp(this.arrayIndex) == 0 || paInterval.cmp(this.arrayIndex) == 1 )) {
+			this.returnValue = false;
+		}
 	}
 }
