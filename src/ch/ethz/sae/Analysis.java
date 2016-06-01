@@ -210,11 +210,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 		Analysis.man.setAlgorithm(Manager.FUNID_MEET, Integer.MAX_VALUE);
 		Analysis.man.setAlgorithm(Manager.FUNID_MEET_TCONS_ARRAY, Integer.MAX_VALUE);
 		
-		System.out.println("\n" + eqExpr);
-		System.out.println("Left: " + getInterval(new AWrapper(in), left));
-		System.out.println("Right: " + getInterval(new AWrapper(in), right));
-		System.out.println("In: " + Arrays.toString(in.toTcons(man)));
-		
 		if (eqExpr instanceof JNeExpr) {
 			// !=			
 			Tcons1 disequalityConstraint = new Tcons1 (env, Tcons1.DISEQ, (Texpr1Node) differenceTreeLR);
@@ -267,12 +262,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<AWrapper> {
 		else {
 			System.out.println("Unexpexted condition: " + eqExpr.toString() + " class:" + eqExpr.getClass().toString() );
 		}
-		System.out.println("If branch: " + Arrays.toString(ow_branchout.get().toTcons(man)));
-		System.out.println("Left: " + getInterval(ow_branchout, left));
-		System.out.println("Right: " + getInterval(ow_branchout, right));
-		System.out.println("Else branch: " + Arrays.toString(ow.get().toTcons(man)));
-		System.out.println("Left: " + getInterval(ow, left));
-		System.out.println("Right: " + getInterval(ow, right));
 	}
 	
 	
